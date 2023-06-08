@@ -1,12 +1,28 @@
 <?php
 
 function loadHeader(){
-    print ("<input type='submit' value='INICIO' onclick='03-home.php'> 
-    <input type='submit' value='PRODUCTOS' onclick='04-productos.php'>
-    <input type='submit' value='CLIENTES' onclick='04-añadirCliente.php'>
-    <input type='submit' value='PEDIDOS' onclick='04-hacerPedido.php'>
-    <input type='submit' value='PENDIENTES' onclick='04-verPendientes.php'>
-    <input type='submit' value='CAJA' onclick='04-contarCaja.php'>");
+    print ("<form class='menu' action='03-home.php'>
+    <input type='submit' id='home' class='iMenu' value='INICIO'/> 
+    </form>
+    <form class='menu'  action='04-productos.php'>
+    <input type='submit' id='products' class='iMenu' value='PRODUCTOS'/>
+    </form>
+    <form class='menu' action='04-añadirCliente.php'>
+    <input type='submit' id='clients' class='iMenu' value='CLIENTES'/>
+    </form>
+    <form class='menu' action='04-hacerPedido.php'>
+    <input type='submit' id='orders' class='iMenu' value='PEDIDOS'/>
+    </form>
+    <form class='menu' action='04-verPendientes.php'>
+    <input type='submit' id='waiting' class='iMenu' value='PENDIENTES'/>
+    </form>
+    <form class='menu' action='04-contarCaja.php'>
+    <input type='submit' id='money' class='iMenu' value='CAJA'/>
+    </form>");
+}
+
+function msg(){
+    print "<h2>Bienvenido, aquí tienes la lista de restaurantes</h2>";
 }
 
 function comprobarLogin() { /*USADA EN HOME*/ 
@@ -62,7 +78,6 @@ function mostrarRestaurantes(){ /* USADA EN EL HOME */
     if (isset($_SESSION['usuario'])){
         $usuario=$_SESSION['usuario']; 
         if ($usuario=='admin'){
-            echo "Aquí tienes la lista de todos los restaurantes";
             $busqueda=mysqli_query($conexion,"SELECT nombre, propietario FROM restaurantes ORDER BY propietario, nombre;");
             $nfilas = mysqli_num_rows ($busqueda);
             if ($nfilas > 0) {
@@ -86,7 +101,6 @@ function mostrarRestaurantes(){ /* USADA EN EL HOME */
                 print ("</TABLE>\n");
             }
         }else{
-            echo "Aquí tienes la lista de tus restaurantes";
             $busqueda=mysqli_query($conexion,"SELECT nombre FROM restaurantes WHERE propietario='$usuario';");
             $nfilas = mysqli_num_rows ($busqueda);
             if ($nfilas > 0) {
@@ -191,34 +205,39 @@ function addProduct(){
 function viewProducts(){
     session_start();
     require "conexion.php";
+    $restaurant=$_SESSION['restauranteIndicado'];
     if(isset($_POST['categories'])){
         $category=$_POST['categories'];
-        $query=mysqli_query($conexion,"SELECT * FROM productos WHERE categoria='$category'");
-        $nFilas = mysqli_num_rows ($query);
-            if($nFilas >0) {
-            //mostamos la tabla
-                print ("<TABLE border='1'>");print ("<TR>");
-                print ("<TH>nombre</TH>"); print ("<TH>categoría</TH>");
-                print ("<TH>stock</TH>"); print ("<TH>precioUnidad</TH>");
-                print ("<TH>cantidad</TH>"); print ("</TR>");
-                for ($i=0; $i<$nFilas; $i++) {
-                    $resultado = mysqli_fetch_array ($query);
-                    //si esta inicializado el pedido
-                    //restara las unidades puestas del stock comparando con el código
-                    if (isset($_SESSION['pedido'][$resultado['id']])){
-                        $quedan = $resultado['stock'] - $_SESSION['pedido'][$resultado['id']];
-                    }else{
-                        $quedan = $resultado['stock'];
+        $query=mysqli_query($conexion,"SELECT id FROM restaurantes WHERE nombre='$restaurant'");
+        while($resultado = mysqli_fetch_array ($query)){
+            $idRestaurant=$resultado['id'];
+            $newQuery=mysqli_query($conexion,"SELECT producto, stock, precio FROM productos_restaurantes WHERE restaurante='$idRestaurant'");
+            while($resultado2 = mysqli_fetch_array ($newQuery)){
+                $idProduct=$resultado2['producto'];
+                $anotherQuery=mysqli_query($conexion,"SELECT DISTINCT nombre, categoria FROM productos WHERE categoria='$category' AND id='$idProduct'");
+                $nFilas = mysqli_num_rows ($anotherQuery);
+                if($nFilas >0) {
+                    print ("<TABLE border='1'>");print ("<TR>");
+                    print ("<TH>nombre</TH>"); print ("<TH>categoría</TH>");
+                    print ("<TH>stock</TH>"); print ("<TH>precioUnidad</TH>");
+                    print ("<TH>cantidad</TH>"); print ("</TR>");
+                    for ($i=0; $i<$nFilas; $i++) {
+                        $resultado3 = mysqli_fetch_array ($anotherQuery);
+                        if (isset($_SESSION['pedido'][$idProduct])){
+                            $quedan = $resultado2['stock'] - $_SESSION['pedido'][$idProduct];
+                        }else{
+                            $quedan = $resultado2['stock'];
+                        }
+                        print ("<TR>"); print ("<TD>" . $resultado3['nombre'] . "</TD>");
+                        print ("<TD>" . $resultado3['categoria'] . "</TD>"); 
+                        print ("<TD>" . $quedan . "</TD>");
+                        print ("<TD>" . $resultado2['precio'] . "</TD>");
+                        print ("<TD><input type='number' name=" . $idProduct .
+                        " value='0' min='0' max='". $resultado2['stock']. "'/></TD>"); print ("</TR>");
                     }
-                    print ("<TR>"); print ("<TD>" . $resultado['nombre'] . "</TD>");
-                    print ("<TD>" . $resultado['categoria'] . "</TD>"); 
-                    print ("<TD>" . $quedan . "</TD>");
-                    print ("<TD>" . $resultado['precioUnidad'] . "</TD>");
-                    print ("<TD><input type='number' name=" . $resultado['id'] .
-                        //traemos el codigo de producto para diferenciar cada uno de los campos cantidad
-                        " value='0' min='0' max='". $resultado['stock']. "'/></TD>"); print ("</TR>");//imprimimos un campo numerico para que introduzca la cantidad que quiere
                 }
             }
+        }
     }
 }
 
@@ -294,7 +313,6 @@ function loadingClients(){
                 $resultado = mysqli_fetch_array ($busqueda);
                 print ("<TR>"); 
                 print ("<TD><a href='06-categorias.php?cliente=". $resultado['id'] . "'>" . $resultado['nombrecompleto'] . "</TD>");
-                //<input type=button value=". $resultado['id'] . " onclick=06-categorias.php'>" . $resultado['nombrecompleto'] . "</TD>");
                 print ("</TR>");
             }
             print ("</TABLE>\n");
@@ -453,7 +471,7 @@ function noPay(){
             $idClient=$resultado['cliente'];
             $consulta2=mysqli_query($conexion, "SELECT CONCAT (nombre, ' ', apellidos) AS nombrecompleto FROM clientes WHERE id='$idClient'");
             $resultado2=mysqli_fetch_array ($consulta2);
-            echo "Estos son los pedidos sin pagar";
+            print "<h3>Estos son los pedidos sin pagar</h3>";
             print ("<TABLE border='1'>");print ("<TR>");
             print ("<TH>Nombre</TH>"); print ("<TH>Pedido</TH>");
             print ("<TH>Fecha</TH>"); print ("<TH>Estado</TH>");
@@ -486,7 +504,7 @@ function countWinnings(){
         $wininngs+=$resultado['precioTotal'];
     }
     if(isset($wininngs)){
-    echo "La cantidad ganada hoy es de: " . $wininngs. "€";
+    print "<h3>La cantidad ganada hoy es de: " . $wininngs. "€</h3>";
     }
 }
 

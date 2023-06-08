@@ -5,21 +5,29 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="../css/css.css">
 </head>
 <body>
-    <?php
-    session_start();
-    if(isset($_GET['cliente'])){
-        $_SESSION['cliente']=$_GET['cliente'];
-    }
-    ?>
     <center>
+        
         <div class="container">
+            <?php
+                session_start();
+                if(isset($_GET['cliente'])){
+                $_SESSION['cliente']=$_GET['cliente'];
+            }
+            ?>
+            <div class="header">
+                <?php
+                    include "funciones.php";
+                    loadHeader();
+                ?>
+            
+            </div>
             <div class="clientes">
             <form name="categories" action="07-elegirProductos.php" method="post">
                     <select name="categories">
                     <?php
-                    include "funciones.php";
                     loadingCategories();
                     ?>
                     </select>

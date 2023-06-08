@@ -5,15 +5,22 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="../css/css.css">
 </head>
 <body>
-<center>
+    <center>
+        
         <div class="container">
-            <div class="header"></div>
+            <div class="header">
+                <?php
+                    include "funciones.php";
+                    loadHeader();
+                ?>
+            
+            </div>
             <div class="products">
                 <form name="formularios" action="añadirAlCarrito.php" method="post"> 
                     <?php
-                        include "funciones.php";
                         viewProducts();
                     ?>
                     <input type="submit" name="Añadir" value="Elegir"/>

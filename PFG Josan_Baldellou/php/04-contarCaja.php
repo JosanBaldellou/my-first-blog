@@ -5,16 +5,22 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productos</title>
+    <link rel="stylesheet" type="text/css" href="../css/css.css">
 </head>
 <body>
     <div class="container">
 
-        <div class="header"></div>
+        <div class="header">
+            <?php
+                include "funciones.php";
+                loadHeader();
+                ?>
+        </div>
 
         <div class="dateCounting">
 
         <form name="formularios" action="05-ganancias.php" method="post">
-            Dime de que fecha quieres comprobar tus ganancias:<br>
+            <p>Dime de que fecha quieres comprobar tus ganancias:<br></p>
             <input type="date" name="money"/><br>
             <input type="submit" name="countingWinnings" value="Ver Caja"/>
         </form>

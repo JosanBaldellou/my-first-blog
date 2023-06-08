@@ -19,7 +19,7 @@
                 if(isset($_POST['nickname'])){
                     signIn();
             ?>
-            <form name="formularios" action="index.php">
+            <form name="formularios" action="01-index.php">
                 <input type="submit" name="Volver" value="Volver"/>
             </form>
             <?php
